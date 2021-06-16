@@ -8,7 +8,7 @@ Created on 2018-04-23 by hbldh <henrik.blidh@nedomkull.com>
 import abc
 import asyncio
 import uuid
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, Any
 from warnings import warn
 
 from bleak.backends.service import BleakGATTServiceCollection
@@ -185,6 +185,25 @@ class BaseBleakClient(abc.ABC):
         """
         raise NotImplementedError()
 
+    async def read_gatt_char_typed(
+        self,
+        char_specifier: BleakGATTCharacteristic,
+        **kwargs
+    ) -> Any:
+        """Perform read operation on the specified GATT characteristic.
+        The data returned is unmarshalled into native Python form based on the type information in the char_specifier.
+
+        Args:
+            char_specifier (BleakGATTCharacteristic): The characteristic to read from.
+        Returns:
+            The read data.
+
+        """
+        marshaller = char_specifier.get_marshaller()
+        data_bytes = await self.read_gatt_char(char_specifier, **kwargs)
+        data = marshaller.unmarshall(data_bytes)
+        return data
+
     @abc.abstractmethod
     async def read_gatt_descriptor(self, handle: int, **kwargs) -> bytearray:
         """Perform read operation on the specified GATT descriptor.
@@ -216,6 +235,25 @@ class BaseBleakClient(abc.ABC):
 
         """
         raise NotImplementedError()
+
+    async def write_gatt_char_typed(
+        self,
+        char_specifier: BleakGATTCharacteristic,
+        data: Any,
+        response: bool = False,
+    ) -> None:
+        """Perform a write operation on the specified GATT characteristic.
+        The data to write is marshalled based on the type information in the characteristic.
+
+        Args:
+            char_specifier (BleakGATTCharacteristic): The characteristic to write.
+            data: The data to write.
+            response (bool): If write-with-response operation should be done. Defaults to `False`.
+
+        """
+        marshaller = char_specifier.get_marshaller()
+        data_bytes = marshaller.marshall(data)
+        return await self.write_gatt_char(char_specifier, data_bytes, response)
 
     @abc.abstractmethod
     async def write_gatt_descriptor(

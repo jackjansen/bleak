@@ -43,9 +43,9 @@ async def run(address, debug=False):
             for char in service.characteristics:
                 if "read" in char.properties:
                     try:
-                        value = bytes(await client.read_gatt_char(char.uuid))
+                        value = await client.read_gatt_char_typed(char)
                         log.info(
-                            f"\t[Characteristic] {char} ({','.join(char.properties)}), Value: {value}"
+                            f"\t[Characteristic] {char} ({','.join(char.properties)}), Value: {value}, Type: {type(value)}"
                         )
                     except Exception as e:
                         log.error(

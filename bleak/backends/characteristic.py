@@ -26,6 +26,18 @@ class GattCharacteristicsFlags(enum.Enum):
     reliable_write = 0x0100
     writable_auxiliaries = 0x0200
 
+class BleakGATTMarshaller(abc.ABC):
+    @classmethod
+    def get_marshaller(klass) -> Any:
+        return BleakGATTMarshaller()
+
+    @staticmethod
+    def marshall(data : Any) -> bytes:
+        return bytes(data)
+
+    @staticmethod
+    def unmarshall(data_bytes : bytes) -> Any:
+        return data_bytes
 
 class BleakGATTCharacteristic(abc.ABC):
     """Interface for the Bleak representation of a GATT Characteristic"""
@@ -83,6 +95,9 @@ class BleakGATTCharacteristic(abc.ABC):
     ) -> Union[BleakGATTDescriptor, None]:
         """Get a descriptor by handle (int) or UUID (str or uuid.UUID)"""
         raise NotImplementedError()
+
+    def get_marshaller(self) -> BleakGATTMarshaller:
+        return BleakGATTMarshaller.get_marshaller()
 
     @abc.abstractmethod
     def add_descriptor(self, descriptor: BleakGATTDescriptor):
