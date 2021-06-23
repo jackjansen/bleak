@@ -35,7 +35,7 @@ async def run(address, debug=False):
         h.setLevel(logging.DEBUG)
         log.addHandler(h)
 
-    async with BleakClient(address) as client:
+    async with BleakClient(address, timeout=10) as client:
         log.info(f"Connected: {client.is_connected}")
 
         for service in client.services:

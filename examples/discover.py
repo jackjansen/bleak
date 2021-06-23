@@ -13,7 +13,7 @@ from bleak import discover
 
 
 async def run():
-    devices = await discover()
+    devices = await discover(timeout=10)
     for d in devices:
         print(d)
 
