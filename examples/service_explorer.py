@@ -51,6 +51,7 @@ async def run(address, debug=False):
                         log.error(
                             f"\t[Characteristic] {char} ({','.join(char.properties)}), Value: {e}"
                         )
+                        raise
 
                 else:
                     value = None

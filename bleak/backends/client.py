@@ -199,7 +199,7 @@ class BaseBleakClient(abc.ABC):
             The read data.
 
         """
-        marshaller = char_specifier.get_marshaller()
+        marshaller = await char_specifier.get_marshaller(self)
         data_bytes = await self.read_gatt_char(char_specifier, **kwargs)
         data = marshaller.unmarshall(data_bytes)
         return data
