@@ -68,12 +68,29 @@ AdvertisementDataFilter = Callable[
 
 
 class BaseBleakScanner(abc.ABC):
-    """Interface for Bleak Bluetooth LE Scanners"""
+    """
+    Interface for Bleak Bluetooth LE Scanners
 
-    def __init__(self, *args, **kwargs):
+    Args:
+        detection_callback:
+            Optional function that will be called each time a device is
+            discovered or advertising data has changed.
+        service_uuids:
+            Optional list of service UUIDs to filter on. Only advertisements
+            containing this advertising data will be received.
+    """
+
+    def __init__(
+        self,
+        detection_callback: Optional[AdvertisementDataCallback],
+        service_uuids: Optional[List[str]],
+    ):
         super(BaseBleakScanner, self).__init__()
         self._callback: Optional[AdvertisementDataCallback] = None
-        self.register_detection_callback(kwargs.get("detection_callback"))
+        self.register_detection_callback(detection_callback)
+        self._service_uuids: Optional[List[str]] = (
+            [u.lower() for u in service_uuids] if service_uuids is not None else None
+        )
 
     async def __aenter__(self):
         await self.start()
@@ -155,7 +172,8 @@ class BaseBleakScanner(abc.ABC):
         """
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def discovered_devices(self) -> List[BLEDevice]:
         """Gets the devices registered by the BleakScanner.
 
@@ -201,7 +219,9 @@ class BaseBleakScanner(abc.ABC):
         """
         device_identifier = device_identifier.lower()
         return await cls.find_device_by_filter(
-            lambda d, ad: d.address.lower() == device_identifier
+            lambda d, ad: d.address.lower() == device_identifier,
+            timeout=timeout,
+            **kwargs,
         )
 
     @classmethod

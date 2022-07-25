@@ -19,6 +19,7 @@ EMAIL = "henrik.blidh@nedomkull.com"
 AUTHOR = "Henrik Blidh"
 
 REQUIRED = [
+    "typing-extensions>=4.2.0",
     # Linux reqs
     'dbus-next;platform_system=="Linux"',
     # macOS reqs
@@ -26,17 +27,12 @@ REQUIRED = [
     'pyobjc-framework-CoreBluetooth;platform_system=="Darwin"',
     'pyobjc-framework-libdispatch;platform_system=="Darwin"',
     # Windows reqs
-    'pythonnet;platform_system=="Windows" and python_version < "3.9.0"',
-    'winrt>=1.0.20330.1;platform_system=="Windows" and python_version >= "3.9.0"',
+    'bleak-winrt>=1.1.1;platform_system=="Windows"',
 ]
-
-TEST_REQUIRED = ["pytest", "pytest-cov"]
 
 here = os.path.abspath(os.path.dirname(__file__))
 with io.open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = "\n" + f.read()
-with io.open(os.path.join(here, "CHANGELOG.rst"), encoding="utf-8") as f:
-    long_description += "\n\n" + f.read()
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
@@ -87,39 +83,35 @@ setup(
     author_email=EMAIL,
     url=URL,
     packages=find_packages(exclude=("tests", "examples", "docs", "BleakUWPBridge")),
-    package_data={"bleak.backends.dotnet": ["*.dll"]},
     entry_points={"console_scripts": ["bleak-lescan=bleak:cli"]},
     install_requires=REQUIRED,
     test_suite="tests",
-    tests_require=TEST_REQUIRED,
-    extras_require={
-        "winrt": [
-            "winrt>=1.0.20330.1",
-        ],
-        "pythonnet": [
-            "pythonnet>=2.5.1",
-        ],
-    },
     include_package_data=True,
     license="MIT",
+    project_urls={
+        "Changelog": "https://github.com/hbldh/bleak/blob/develop/CHANGELOG.rst",
+        "Documentation": "https://bleak.readthedocs.io",
+        "Support": "https://github.com/hbldh/bleak/discussions",
+        "Issues": "https://github.com/hbldh/bleak/issues",
+    },
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 4 - Beta",
         "Framework :: AsyncIO",
         "Intended Audience :: Developers",
-        "Topic :: Communications",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Operating System :: Microsoft :: Windows :: Windows 10",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Android",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     # $ setup.py publish support.

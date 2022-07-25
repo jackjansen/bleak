@@ -2,13 +2,13 @@
 from uuid import UUID
 from typing import List, Union
 
+from bleak_winrt.windows.devices.bluetooth.genericattributeprofile import (
+    GattCharacteristicProperties,
+)
+
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.backends.winrt.descriptor import BleakGATTDescriptorWinRT
-
-from winrt.windows.devices.bluetooth.genericattributeprofile import (
-    GattCharacteristicProperties,
-)
 
 
 _GattCharacteristicsPropertiesMap = {
@@ -67,7 +67,7 @@ class BleakGATTCharacteristicWinRT(BleakGATTCharacteristic):
         self.__descriptors = []
         self.__props = [
             _GattCharacteristicsPropertiesMap[v][0]
-            for v in [2 ** n for n in range(10)]
+            for v in [2**n for n in range(10)]
             if (self.obj.characteristic_properties & v)
         ]
 
@@ -94,7 +94,11 @@ class BleakGATTCharacteristicWinRT(BleakGATTCharacteristic):
     @property
     def description(self) -> str:
         """Description for this characteristic"""
-        return self.obj.user_description
+        return (
+            self.obj.user_description
+            if self.obj.user_description
+            else super().description
+        )
 
     @property
     def properties(self) -> List[str]:

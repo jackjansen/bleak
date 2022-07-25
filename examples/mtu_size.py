@@ -11,14 +11,14 @@ from bleak.backends.scanner import BLEDevice, AdvertisementData
 CHAR_UUID = "00000000-0000-0000-0000-000000000000"
 
 
-async def start():
+async def main():
     queue = asyncio.Queue()
 
     def callback(device: BLEDevice, adv: AdvertisementData) -> None:
         # can use advertising data to filter here
         queue.put_nowait(device)
 
-    async with BleakScanner(detection_callback=callback):
+    async with BleakScanner(callback):
         # get the first matching device
         device = await queue.get()
 
@@ -41,7 +41,5 @@ async def start():
             await client.write_gatt_char(CHAR_UUID, chunk)
 
 
-# It is important to use asyncio.run() to get proper cleanup on KeyboardInterrupt.
-# This was introduced in Python 3.7. If you need it in Python 3.6, you can copy
-# it from https://github.com/python/cpython/blob/3.7/Lib/asyncio/runners.py
-asyncio.run(start())
+if __name__ == "__main__":
+    asyncio.run(main())
