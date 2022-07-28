@@ -8,9 +8,10 @@ Created on 2019-03-19 by hbldh <henrik.blidh@nedomkull.com>
 import abc
 import enum
 from uuid import UUID
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 import struct
 
+from bleak import BleakClient
 from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.uuids import uuidstr_to_str
 from bleak.backends.marshall2904 import BleakGATTMarshaller
@@ -84,7 +85,7 @@ class BleakGATTCharacteristic(abc.ABC):
         """Get a descriptor by handle (int) or UUID (str or uuid.UUID)"""
         raise NotImplementedError()
 
-    async def get_marshaller(self, client: Any) -> BleakGATTMarshaller:
+    async def get_marshaller(self, client: Optional[BleakClient]) -> BleakGATTMarshaller:
         descr_2904 = self.get_descriptor("00002904-0000-1000-8000-00805f9b34fb")
         return await BleakGATTMarshaller.get_marshaller(descr_2904=descr_2904, uuid=self.uuid, client=client)
 

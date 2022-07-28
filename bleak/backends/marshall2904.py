@@ -6,10 +6,14 @@ Created on 2019-03-19 by hbldh <henrik.blidh@nedomkull.com>
 
 """
 import abc
+import sys
 import enum
 from uuid import UUID
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 import struct
+
+from bleak import BleakClient
+from bleak.backends.descriptor import BleakGATTDescriptor
 
 def str2bytes(s : str) -> bytes:
     return s.encode('utf8')
@@ -47,7 +51,7 @@ Table_uuid_to_marshaller = {}
 
 class BleakGATTMarshaller(abc.ABC):
     @classmethod
-    async def get_marshaller(klass, client: Any, descr_2904=None, uuid=None) -> Any:
+    async def get_marshaller(klass, client: Optional[BleakClient]=None, descr_2904: Optional[BleakGATTDescriptor]=None, uuid:Optional[str]=None) -> Any:
         if uuid:
             if uuid in Table_uuid_to_marshaller:
                 return Table_uuid_to_marshaller[uuid]()
