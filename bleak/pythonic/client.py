@@ -40,7 +40,7 @@ class BleakPythonicClient(BleakClient):
             response (bool): If write-with-response operation should be done. Defaults to `False`.
 
         """
-        marshaller = self.get_marshaller(char_specifier)
+        marshaller = await self.get_marshaller(char_specifier)
         data_bytes = marshaller.marshall(data)
         return await self.write_gatt_char(char_specifier, data_bytes, response)
 
