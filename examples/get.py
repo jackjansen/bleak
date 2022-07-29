@@ -13,10 +13,9 @@ from bleak import BleakScanner
 from bleak.pythonic.client import BleakPythonicClient
 
 device = sys.argv[1]
-service = sys.argv[2]
-characteristic = sys.argv[3]
+characteristic = sys.argv[2]
 
-async def run(device, service, charachteristic):
+async def run(device, charachteristic):
     # If the device is specified by name we look it up
     if re.fullmatch('[0-9a-fA-F:-]*', device):
         dev = await BleakScanner.find_device_by_address(device)
@@ -28,13 +27,10 @@ async def run(device, service, charachteristic):
         print(f'Device {device} not found')
         return
     async with BleakPythonicClient(dev) as client:
-        services = await client.get_services()
-        srv = services.get_service(service)
-        chr = srv.get_characteristic(characteristic)
-        value = await client.read_gatt_char_typed(chr)
+        value = await client.read_gatt_char_typed(characteristic)
     print(value)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    loop.run_until_complete(run(device, service, characteristic))
+    loop.run_until_complete(run(device, characteristic))

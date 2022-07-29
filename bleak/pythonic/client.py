@@ -45,7 +45,10 @@ class BleakPythonicClient(BleakClient):
         return await self.write_gatt_char(char_specifier, data_bytes, response)
 
     async def get_marshaller(self, char_specifier: Union[BleakGATTCharacteristic, int, str, uuid.UUID]) -> BleakGATTMarshaller:
-        assert isinstance(char_specifier, BleakGATTCharacteristic) # For now...
+        if not isinstance(char_specifier, BleakGATTCharacteristic):
+            coll = await self.get_services()
+            char_specifier = coll.get_characteristic(char_specifier)
+        assert isinstance(char_specifier, BleakGATTCharacteristic)
         descr_2904 = char_specifier.get_descriptor("00002904-0000-1000-8000-00805f9b34fb")
         return await BleakGATTMarshaller.get_marshaller(descr_2904=descr_2904, uuid=char_specifier.uuid, client=self)
 
