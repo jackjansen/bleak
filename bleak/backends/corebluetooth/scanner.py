@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 from bleak.backends.corebluetooth.CentralManagerDelegate import CentralManagerDelegate
 from bleak.backends.corebluetooth.utils import cb_uuid_to_str
-from bleak.backends.device import BLEDevice
+from bleak.backends.corebluetooth.device import BLEDevice, BLEDeviceCoreBluetooth
 from bleak.backends.scanner import (
     AdvertisementDataCallback,
     BaseBleakScanner,
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class BleakScannerCoreBluetooth(BaseBleakScanner):
-    """The native macOS Bleak BLE Scanner.
+    """Interface for Bleak Bluetooth LE Scanners, CoreBluetooth implementation.
 
     Documentation:
     https://developer.apple.com/documentation/corebluetooth/cbcentralmanager
@@ -29,6 +29,9 @@ class BleakScannerCoreBluetooth(BaseBleakScanner):
     devices because private devices may obscure their Bluetooth addresses. To cope
     with this, CoreBluetooth utilizes UUIDs for each peripheral. Bleak uses
     this for the BLEDevice address on macOS.
+
+    A BleakScanner can be used as an asynchronous context manager in which case it automatically
+    starts and stops scanning.
 
     Args:
         detection_callback:
@@ -113,7 +116,7 @@ class BleakScannerCoreBluetooth(BaseBleakScanner):
                 platform_data=(p, a, r),
             )
 
-            device = BLEDevice(
+            device = BLEDeviceCoreBluetooth(
                 p.identifier().UUIDString(),
                 p.name(),
                 p,
@@ -134,17 +137,7 @@ class BleakScannerCoreBluetooth(BaseBleakScanner):
         self._manager.callbacks.pop(id(self), None)
 
     def set_scanning_filter(self, **kwargs):
-        """Set scanning filter for the scanner.
-
-        .. note::
-
-            This is not implemented for macOS yet.
-
-        Raises:
-
-           ``NotImplementedError``
-
-        """
+        """Not implemented for CoreBluetooth."""
         raise NotImplementedError(
             "Need to evaluate which macOS versions to support first..."
         )
@@ -185,7 +178,7 @@ class BleakScannerCoreBluetooth(BaseBleakScanner):
                 service_data[cb_uuid_to_str(u)] = bytes(adv_service_data[u])
 
             found.append(
-                BLEDevice(
+                BLEDeviceCoreBluetooth(
                     address,
                     name,
                     details,

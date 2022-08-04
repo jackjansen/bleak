@@ -13,7 +13,7 @@ from bleak.backends.scanner import (
     BaseBleakScanner,
     AdvertisementData,
 )
-from bleak.backends.device import BLEDevice
+from bleak.backends.p4android.device import BLEDevice, BLEDeviceP4Android
 from bleak.exc import BleakError
 
 from android.broadcast import BroadcastReceiver
@@ -27,8 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 class BleakScannerP4Android(BaseBleakScanner):
-    """
-    The python-for-android Bleak BLE Scanner.
+    """Interface for Bleak Bluetooth LE Scanners, python-for-android implementation.
+
+    Implemented using `Python/WinRT <https://github.com/Microsoft/xlang/tree/master/src/package/pywinrt/projection/>`_.
+
+    A BleakScanner can be used as an asynchronous context manager in which case it automatically
+    starts and stops scanning.
 
     Args:
         detection_callback:
@@ -36,10 +40,9 @@ class BleakScannerP4Android(BaseBleakScanner):
             discovered or advertising data has changed.
         service_uuids:
             Optional list of service UUIDs to filter on. Only advertisements
-            containing this advertising data will be received. Specifying this
-            also enables scanning while the screen is off on Android.
+            containing this advertising data will be received.
         scanning_mode:
-            Set to ``"passive"`` to avoid the ``"active"`` scanning mode.
+            Set to "passive" to avoid the "active" scanning mode.
     """
 
     __scanner = None
@@ -226,6 +229,7 @@ class BleakScannerP4Android(BaseBleakScanner):
         self.__stop()
 
     def set_scanning_filter(self, **kwargs):
+        """Not implemented in Android"""
         # If we do end up implementing this, this should accept List<ScanFilter>
         # and ScanSettings java objects to pass to startScan().
         raise NotImplementedError("not implemented in Android backend")
@@ -279,7 +283,7 @@ class _PythonScanCallback(utils.AsyncJavaCallbacks):
             service_uuids=service_uuids,
             platform_data=(result,),
         )
-        device = BLEDevice(
+        device = BLEDeviceP4Android(
             device.getAddress(),
             device.getName(),
             rssi=result.getRssi(),
