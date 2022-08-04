@@ -11,7 +11,7 @@ from bleak_winrt.windows.devices.bluetooth.advertisement import (
 )
 from typing_extensions import Literal
 
-from ..device import BLEDevice
+from .device import BLEDevice, BLEDeviceWinRT
 from ..scanner import AdvertisementDataCallback, BaseBleakScanner, AdvertisementData
 from ...assigned_numbers import AdvertisementDataType
 
@@ -51,9 +51,12 @@ class _RawAdvData(NamedTuple):
 
 
 class BleakScannerWinRT(BaseBleakScanner):
-    """The native Windows Bleak BLE Scanner.
+    """Interface for Bleak Bluetooth LE Scanners, Windows implementation.
 
     Implemented using `Python/WinRT <https://github.com/Microsoft/xlang/tree/master/src/package/pywinrt/projection/>`_.
+
+    A BleakScanner can be used as an asynchronous context manager in which case it automatically
+    starts and stops scanning.
 
     Args:
         detection_callback:
@@ -63,8 +66,7 @@ class BleakScannerWinRT(BaseBleakScanner):
             Optional list of service UUIDs to filter on. Only advertisements
             containing this advertising data will be received.
         scanning_mode:
-            Set to ``"passive"`` to avoid the ``"active"`` scanning mode.
-
+            Set to "passive" to avoid the "active" scanning mode.
     """
 
     def __init__(
@@ -217,16 +219,15 @@ class BleakScannerWinRT(BaseBleakScanner):
         self.watcher = None
 
     def set_scanning_filter(self, **kwargs):
-        """Set a scanning filter for the BleakScanner.
+        """Set a scanning filter for the BleakScanner, Windows specific.
 
-        Keyword Args:
-          SignalStrengthFilter (``Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter``): A
-            BluetoothSignalStrengthFilter object used for configuration of Bluetooth
-            LE advertisement filtering that uses signal strength-based filtering.
-          AdvertisementFilter (Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter): A
-            BluetoothLEAdvertisementFilter object used for configuration of Bluetooth LE
-            advertisement filtering that uses payload section-based filtering.
-
+        Args:
+            SignalStrengthFilter (Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter):
+                A BluetoothSignalStrengthFilter object used for configuration of Bluetooth
+                LE advertisement filtering that uses signal strength-based filtering.
+            AdvertisementFilter (Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter):
+                A BluetoothLEAdvertisementFilter object used for configuration of Bluetooth LE
+                advertisement filtering that uses payload section-based filtering.
         """
         if "SignalStrengthFilter" in kwargs:
             # TODO: Handle SignalStrengthFilter parameters
@@ -259,6 +260,6 @@ class BleakScannerWinRT(BaseBleakScanner):
                 local_name = args.advertisement.local_name
             rssi = args.raw_signal_strength_in_d_bm
 
-        return BLEDevice(
+        return BLEDeviceWinRT(
             bdaddr, local_name, raw_data, rssi, uuids=uuids, manufacturer_data=data
         )

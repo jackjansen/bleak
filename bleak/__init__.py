@@ -17,10 +17,34 @@ from bleak._api import (
     _BleakScannerImplementation,
     BleakClient,
     _BleakClientImplementation,
-    discover,
+    BLEDevice,
+    _BLEDeviceImplementation,
+    AdvertisementData,
+    AdvertisementDataCallback,
+    AdvertisementDataFilter,
+    BleakGATTServiceCollection,
+    BleakGATTService,
+    _BleakGATTServiceImplementation,
+    BleakGATTCharacteristic,
+    _BleakGATTCharacteristicImplementation,
+    BleakGATTDescriptor,
+    _BleakGATTDescriptorImplementation,
 )
 
-__all__ = ["BleakError", "BleakScanner", "BleakClient", "discover", "cli"]
+__all__ = [
+    "BleakError",
+    "BleakScanner",
+    "BleakClient",
+    "BLEDevice",
+    "AdvertisementData",
+    "AdvertisementDataCallback",
+    "AdvertisementDataFilter",
+    "BleakGATTServiceCollection",
+    "BleakGATTService",
+    "BleakGATTCharacteristic",
+    "BleakGATTDescriptor",
+    "discover",
+]
 
 _logger = logging.getLogger(__name__)
 _logger.addHandler(logging.NullHandler())
@@ -31,24 +55,3 @@ if bool(os.environ.get("BLEAK_LOGGING", False)):
     handler.setFormatter(logging.Formatter(fmt=FORMAT))
     _logger.addHandler(handler)
     _logger.setLevel(logging.DEBUG)
-
-
-def cli():
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        description="Perform Bluetooth Low Energy device scan"
-    )
-    parser.add_argument("-i", dest="adapter", default="hci0", help="HCI device")
-    parser.add_argument(
-        "-t", dest="timeout", type=int, default=5, help="Duration to scan for"
-    )
-    args = parser.parse_args()
-
-    out = asyncio.run(discover(adapter=args.adapter, timeout=float(args.timeout)))
-    for o in out:
-        print(str(o))
-
-
-if __name__ == "__main__":
-    cli()
