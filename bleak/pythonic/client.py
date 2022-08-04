@@ -1,6 +1,7 @@
 from typing import Union, Any
 import uuid
 from bleak import BleakClient
+from bleak.exc import BleakError
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.pythonic.marshall import BleakGATTMarshaller
 
@@ -49,7 +50,10 @@ class BleakPythonicClient(BleakClient):
     ) -> BleakGATTMarshaller:
         if not isinstance(char_specifier, BleakGATTCharacteristic):
             coll = await self.get_services()
-            char_specifier = coll.get_characteristic(char_specifier)
+            char = coll.get_characteristic(char_specifier)
+            if not char:
+                raise BleakError(f"Unknown characteristic {char_specifier}")
+            char_specifier = char
         assert isinstance(char_specifier, BleakGATTCharacteristic)
         descr_2904 = char_specifier.get_descriptor(
             "00002904-0000-1000-8000-00805f9b34fb"
