@@ -7,15 +7,19 @@ from bleak.pythonic.marshall import BleakGATTMarshaller
 
 
 class BleakPythonicClient(BleakClient):
-    __doc__ = BleakClient.__doc__ + """
+    __doc__ = (
+        BleakClient.__doc__
+        + """
     
     This is a subclass of BleakClient, currently with only two methods
     added. To be extended with accessors.
     """
+    )
+
     async def read_gatt_char_typed(
         self,
         char_specifier: Union[BleakGATTCharacteristic, int, str, uuid.UUID],
-        **kwargs
+        **kwargs,
     ) -> Any:
         """Perform read operation on the specified GATT characteristic.
         The data returned is unmarshalled into native Python form based on the type information in the char_specifier.
