@@ -54,7 +54,7 @@ class BleakPythonicClient(BleakClient):
         self, char_specifier: Union[BleakGATTCharacteristic, int, str, uuid.UUID]
     ) -> BleakGATTMarshaller:
         if not isinstance(char_specifier, BleakGATTCharacteristic):
-            coll = await self.get_services()
+            coll = self.services
             char = coll.get_characteristic(char_specifier)
             if not char:
                 raise BleakError(f"Unknown characteristic {char_specifier}")
