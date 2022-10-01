@@ -33,6 +33,4 @@ async def run(device, charachteristic, value):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.set_debug(True)
-    loop.run_until_complete(run(device, characteristic, value))
+    asyncio.run(run(device, characteristic, value))
