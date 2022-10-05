@@ -16,6 +16,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    MutableMapping,
     NamedTuple,
     Optional,
     Set,
@@ -23,7 +24,7 @@ from typing import (
 )
 from weakref import WeakKeyDictionary
 
-from dbus_fast import BusType, Message, MessageType, Variant
+from dbus_fast import BusType, Message, MessageType, Variant, unpack_variants
 from dbus_fast.aio.message_bus import MessageBus
 
 from ...exc import BleakError
@@ -35,7 +36,7 @@ from .defs import Device1, GattService1, GattCharacteristic1, GattDescriptor1
 from .descriptor import BleakGATTDescriptorBlueZDBus
 from .service import BleakGATTServiceBlueZDBus
 from .signals import MatchRules, add_match
-from .utils import assert_reply, unpack_variants
+from .utils import assert_reply
 
 logger = logging.getLogger(__name__)
 
@@ -837,14 +838,13 @@ class BlueZManager:
         """
         for (callback, adapter_path) in self._advertisement_callbacks:
             # filter messages from other adapters
-            if not device_path.startswith(adapter_path):
+            if adapter_path != device["Adapter"]:
                 continue
 
-            # TODO: this should be deep copy, not shallow
             callback(device_path, device.copy())
 
 
-_global_instances: Dict[Any, BlueZManager] = WeakKeyDictionary()
+_global_instances: MutableMapping[Any, BlueZManager] = WeakKeyDictionary()
 
 
 async def get_global_bluez_manager() -> BlueZManager:
