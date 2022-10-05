@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 import abc
 import enum
 from uuid import UUID
@@ -6,7 +7,6 @@ from typing import List, Union, Any
 import struct
 import warnings
 from bleak import BleakClient
-
 
 def str2bytes(s: str) -> bytes:
     return s.encode("utf8")
