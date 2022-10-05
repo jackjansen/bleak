@@ -14,7 +14,18 @@ import logging
 import os
 import sys
 import uuid
-from typing import TYPE_CHECKING, Awaitable, Callable, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 from warnings import warn
 
 import async_timeout
@@ -77,6 +88,14 @@ class BleakScanner:
             custom backend).
         **kwargs:
             Additional args for backwards compatibility.
+
+    .. versionchanged:: 0.15.0
+        ``detection_callback``, ``service_uuids`` and ``scanning_mode`` are no longer keyword-only.
+        Added ``bluez`` parameter.
+
+    .. versionchanged:: 0.18.0
+        No longer is alias for backend type and no longer inherits from :class:`BaseBleakScanner`.
+        Added ``backend`` parameter.
     """
 
     def __init__(
@@ -153,34 +172,74 @@ class BleakScanner:
         )
         self._backend.set_scanning_filter(**kwargs)
 
+    @overload
     @classmethod
-    async def discover(cls, timeout=5.0, **kwargs) -> List[BLEDevice]:
+    async def discover(
+        cls, timeout: float = 5.0, *, return_adv: Literal[False] = False, **kwargs
+    ) -> List[BLEDevice]:
+        ...
+
+    @overload
+    @classmethod
+    async def discover(
+        cls, timeout: float = 5.0, *, return_adv: Literal[True], **kwargs
+    ) -> Dict[str, Tuple[BLEDevice, AdvertisementData]]:
+        ...
+
+    @classmethod
+    async def discover(cls, timeout=5.0, *, return_adv=False, **kwargs):
         """
         Scan continuously for ``timeout`` seconds and return discovered devices.
 
         Args:
             timeout:
                 Time, in seconds, to scan for.
+            return_adv:
+                If ``True``, the return value will include advertising data.
             **kwargs:
                 Additional arguments will be passed to the :class:`BleakScanner`
                 constructor.
 
         Returns:
+            The value of :attr:`discovered_devices_and_advertisement_data` if
+            ``return_adv`` is ``True``, otherwise the value of :attr:`discovered_devices`.
 
+        .. versionchanged:: 0.19.0
+            Added ``return_adv`` parameter.
         """
         async with cls(**kwargs) as scanner:
             await asyncio.sleep(timeout)
-            devices = scanner.discovered_devices
-        return devices
+
+        if return_adv:
+            return scanner.discovered_devices_and_advertisement_data
+
+        return scanner.discovered_devices
 
     @property
     def discovered_devices(self) -> List[BLEDevice]:
-        """Gets the devices registered by the BleakScanner.
-
-        Returns:
-            A list of the devices that the scanner has discovered during the scanning.
         """
-        return self._backend.discovered_devices
+        Gets list of the devices that the scanner has discovered during the scanning.
+
+        If you also need advertisement data, use :attr:`discovered_devices_and_advertisement_data` instead.
+        """
+        return [d for d, _ in self._backend.seen_devices.values()]
+
+    @property
+    def discovered_devices_and_advertisement_data(
+        self,
+    ) -> Dict[str, Tuple[BLEDevice, AdvertisementData]]:
+        """
+        Gets a map of device address to tuples of devices and the most recently
+        received advertisement data for that device.
+
+        The address keys are useful to compare the discovered devices to a set
+        of known devices. If you don't need to do that, consider using
+        ``discovered_devices_and_advertisement_data.values()`` to just get the
+        values instead.
+
+        .. versionadded:: 0.19.0
+        """
+        return self._backend.seen_devices
 
     async def get_discovered_devices(self) -> List[BLEDevice]:
         """Gets the devices registered by the BleakScanner.
@@ -296,6 +355,13 @@ class BleakClient:
             the :meth:`connect` method to implicitly call :meth:`BleakScanner.discover`.
             This is known to cause problems when trying to connect to multiple
             devices at the same time.
+
+    .. versionchanged:: 0.15.0
+        ``disconnected_callback`` is no longer keyword-only. Added ``winrt`` parameter.
+
+    .. versionchanged:: 0.18.0
+        No longer is alias for backend type and no longer inherits from :class:`BaseBleakClient`.
+        Added ``backend`` parameter.
     """
 
     def __init__(
@@ -533,6 +599,10 @@ class BleakClient:
                 The function to be called on notification. Can be regular
                 function or async function.
 
+
+        .. versionchanged:: 0.18.0
+            The first argument of the callback is now a :class:`BleakGATTCharacteristic`
+            instead of an ``int``.
         """
         if not self.is_connected:
             raise BleakError("Not connected")
