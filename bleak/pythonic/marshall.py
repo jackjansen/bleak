@@ -8,7 +8,10 @@ import warnings
 from bleak import BleakClient
 
 
-def str2bytes(s: str) -> bytes:
+def str2bytes(s: str | bytes) -> bytes:
+    # str2bytes also accepts bytes, because things like json-encode return bytes.
+    if type(s) == bytes:
+        return s
     return s.encode("utf8")
 
 
