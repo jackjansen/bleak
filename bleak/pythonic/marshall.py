@@ -110,13 +110,13 @@ class BleakGATTPackMarshaller(BleakGATTMarshaller):
             data = data * (10 ** -self.exponent)
         data = self.frompython(data)
         data_bytes = struct.pack(self.format, data)
-        assert len(data_bytes) == self.length
+        assert len(data_bytes) == self.length, f"Expected {self.length} bytes, got {len(data_bytes)}"
         return data_bytes
 
     def unmarshall(self, data_bytes: bytes) -> Any:
         if not self.length:
             return self.topython(data_bytes)
-        assert len(data_bytes) == self.length
+        assert len(data_bytes) == self.length, f"Expected {self.length} bytes, got {len(data_bytes)}"
         (data,) = struct.unpack(self.format, data_bytes)
         data = self.topython(data)
         if self.exponent != 0:
